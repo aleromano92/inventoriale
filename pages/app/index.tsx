@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 
-const Home: NextPage = () => {
+const AppHome: NextPage = () => {
   return (
     <div className="flex">
       <Head>
@@ -13,7 +13,7 @@ const Home: NextPage = () => {
 
       <main className="flex">
         <h1 className="font-bold">
-          Welcome to <a href="https://nextjs.org">Inventoriale!</a>
+          Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
       </main>
 
@@ -33,4 +33,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default AppHome;
