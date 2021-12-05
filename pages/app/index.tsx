@@ -36,8 +36,10 @@ const AppHome: NextPage = () => {
               width={500}
               height={500}
               onUpdate={(err, result) => {
-                if (result) setBarcodeScan(result.getText());
-                else setBarcodeScan('Not Found');
+                if (result) {
+                  setBarcodeScan(result.getText());
+                  setShouldScanBarcode(false);
+                } else setBarcodeScan('Keep scanning hard!');
               }}
             />
           )}
