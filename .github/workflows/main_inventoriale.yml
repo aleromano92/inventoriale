@@ -50,7 +50,7 @@ jobs:
           name: node-app
           
       - name: Untar
-        run: tar -xvf archive.tar.gz ./untar
+        run: tar -xvf archive.tar.gz
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -59,4 +59,4 @@ jobs:
           app-name: 'inventoriale'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DC2E612BCCAA4637AC107DBABCF27CBB }}
-          package: ./untar
+          package: .
