@@ -9,14 +9,14 @@ type Product = {
   name: string;
 };
 
-const AppHome: NextPage = () => {
-  const [barcodeScan, setBarcodeScan] = useState('');
-  const [product, setProduct] = useState<Product>();
-  const [shouldScanBarcode, setShouldScanBarcode] = useState(false);
+interface State {
+  scannedBarcode: string;
+  product: Product | undefined;
+  status: 'INITIAL' | 'SCANNING' | 'SUCCESSFULLY_SCANNING' | 'PRODUCT_FETCHED_SUCCESSFULLY' | 'PRODUCT_FETCHED_FAILED';
+}
 
-  const scanBarcode = () => {
-    setShouldScanBarcode(true);
-  };
+const AppHome: NextPage = () => {
+  const [pageState, setPageState] = useState<State>({ scannedBarcode: '', product: undefined, status: 'INITIAL' });
 
   return (
     <div className="flex">
@@ -31,34 +31,51 @@ const AppHome: NextPage = () => {
 
         <section>
           <button
-            onClick={scanBarcode}
+            onClick={() => {
+              setPageState({ scannedBarcode: '', product: undefined, status: 'SCANNING' });
+            }}
             className="px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
           >
             Scanna
           </button>
-          {shouldScanBarcode && (
+          <button
+            onClick={() => setPageState({ scannedBarcode: '', product: undefined, status: 'INITIAL' })}
+            className="px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+          >
+            Reset
+          </button>
+          {pageState.status === 'SCANNING' && (
             <BarcodeScannerComponent
               width={500}
               height={500}
               onUpdate={async (err, result) => {
                 if (result) {
                   const scannedBarcode = result.getText();
-                  setBarcodeScan(scannedBarcode);
-                  setShouldScanBarcode(false);
+                  setPageState({ scannedBarcode, product: undefined, status: 'SUCCESSFULLY_SCANNING' });
                   const response = await getProductDetails(scannedBarcode);
                   if (response !== null) {
                     console.log(response);
-                    setProduct({ name: response.data.product.product_name });
+                    setPageState({
+                      scannedBarcode,
+                      product: { name: response.data.product.product_name },
+                      status: 'PRODUCT_FETCHED_SUCCESSFULLY',
+                    });
                   } else {
-                    setProduct({ name: 'not found' });
+                    setPageState({
+                      scannedBarcode,
+                      product: { name: 'Cannot find any product' },
+                      status: 'PRODUCT_FETCHED_FAILED',
+                    });
                   }
-                } else setBarcodeScan('Keep scanning hard!');
+                } else {
+                  setPageState({ scannedBarcode: 'Keep scanning', product: undefined, status: 'SCANNING' });
+                }
               }}
             />
           )}
 
-          <p>Barcode: {barcodeScan}</p>
-          <p>Product name: {product?.name}</p>
+          <p>Barcode: {pageState.scannedBarcode}</p>
+          <p>Product name: {pageState.product?.name}</p>
         </section>
       </main>
     </div>
