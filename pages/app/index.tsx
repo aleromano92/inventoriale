@@ -2,12 +2,10 @@ import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useState } from 'react';
+import { ProductNotification } from '../../components/ProductNotification';
 import { getProductDetails } from '../../services/openFoodData';
+import { Product } from '../../types/product';
 const BarcodeScannerComponent = dynamic(() => import('react-qr-barcode-scanner'), { ssr: false });
-
-type Product = {
-  name: string;
-};
 
 interface State {
   scannedBarcode: string;
@@ -46,8 +44,6 @@ const AppHome: NextPage = () => {
           </button>
           {pageState.status === 'SCANNING' && (
             <BarcodeScannerComponent
-              width={500}
-              height={500}
               onUpdate={async (err, result) => {
                 if (result) {
                   const scannedBarcode = result.getText();
@@ -57,13 +53,16 @@ const AppHome: NextPage = () => {
                     console.log(response);
                     setPageState({
                       scannedBarcode,
-                      product: { name: response.data.product.product_name },
+                      product: {
+                        name: response.data.product.product_name,
+                        imageSrc: response.data.product.image_front_url,
+                      },
                       status: 'PRODUCT_FETCHED_SUCCESSFULLY',
                     });
                   } else {
                     setPageState({
                       scannedBarcode,
-                      product: { name: 'Cannot find any product' },
+                      product: undefined,
                       status: 'PRODUCT_FETCHED_FAILED',
                     });
                   }
@@ -75,7 +74,7 @@ const AppHome: NextPage = () => {
           )}
 
           <p>Barcode: {pageState.scannedBarcode}</p>
-          <p>Product name: {pageState.product?.name}</p>
+          {pageState.product && <ProductNotification product={pageState.product} />}
         </section>
       </main>
     </div>
