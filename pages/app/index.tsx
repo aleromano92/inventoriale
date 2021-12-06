@@ -1,12 +1,17 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import axios from 'axios';
 import { useState } from 'react';
+import { getProductDetails } from '../../services/openFoodData';
 const BarcodeScannerComponent = dynamic(() => import('react-qr-barcode-scanner'), { ssr: false });
+
+type Product = {
+  name: string;
+};
 
 const AppHome: NextPage = () => {
   const [barcodeScan, setBarcodeScan] = useState('');
+  const [product, setProduct] = useState<Product>();
   const [shouldScanBarcode, setShouldScanBarcode] = useState(false);
 
   const scanBarcode = () => {
@@ -35,17 +40,25 @@ const AppHome: NextPage = () => {
             <BarcodeScannerComponent
               width={500}
               height={500}
-              onUpdate={(err, result) => {
+              onUpdate={async (err, result) => {
                 if (result) {
-                  setBarcodeScan(result.getText());
+                  const scannedBarcode = result.getText();
+                  setBarcodeScan(scannedBarcode);
                   setShouldScanBarcode(false);
-                  getProductDetails(result.getText());
+                  const response = await getProductDetails(scannedBarcode);
+                  if (response !== null) {
+                    console.log(response);
+                    setProduct({ name: response.data.product.product_name });
+                  } else {
+                    setProduct({ name: 'not found' });
+                  }
                 } else setBarcodeScan('Keep scanning hard!');
               }}
             />
           )}
 
           <p>Barcode: {barcodeScan}</p>
+          <p>Product name: {product?.name}</p>
         </section>
       </main>
     </div>
@@ -53,12 +66,3 @@ const AppHome: NextPage = () => {
 };
 
 export default AppHome;
-
-async function getProductDetails(barcode: string) {
-  try {
-    const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
-}
