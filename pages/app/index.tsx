@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import Image from 'next/image';
+import axios from 'axios';
 import { useState } from 'react';
 const BarcodeScannerComponent = dynamic(() => import('react-qr-barcode-scanner'), { ssr: false });
 
@@ -39,6 +39,7 @@ const AppHome: NextPage = () => {
                 if (result) {
                   setBarcodeScan(result.getText());
                   setShouldScanBarcode(false);
+                  getProductDetails(result.getText());
                 } else setBarcodeScan('Keep scanning hard!');
               }}
             />
@@ -52,3 +53,12 @@ const AppHome: NextPage = () => {
 };
 
 export default AppHome;
+
+async function getProductDetails(barcode: string) {
+  try {
+    const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+}
