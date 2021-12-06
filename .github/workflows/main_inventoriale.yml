@@ -28,7 +28,7 @@ jobs:
           npm run test --if-present
           
       - name: Tar
-        run: tar -czf archive.tar.gz .
+        run: tar -czf archive.tar.gz .next public next.config.js package.json package-lock.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
@@ -50,7 +50,7 @@ jobs:
           name: node-app
           
       - name: Untar
-        run: tar -xvf archive.tar.gz
+        run: tar -xvf archive.tar.gz ./untar
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -59,4 +59,4 @@ jobs:
           app-name: 'inventoriale'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DC2E612BCCAA4637AC107DBABCF27CBB }}
-          package: .
+          package: ./untar
